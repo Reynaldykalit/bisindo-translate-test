@@ -2,7 +2,7 @@ streamlit==1.45.1
 tensorflow==2.18.0
 ultralytics
 mediapipe==0.10.14
-opencv-python-headless
+opencv-python-headless==4.10.0.84
 numpy==1.26.4
 pandas==2.2.2
 matplotlib
