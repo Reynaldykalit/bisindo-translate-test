@@ -92,6 +92,18 @@ st.markdown(
             margin-bottom: 20px;
         }
         
+        /* Style Streamlit containers with border=True to look like glassmorphic cards */
+        div[data-testid="stVerticalBlockBorderWrapper"] {
+            background-color: rgba(30, 41, 59, 0.7) !important;
+            border-radius: 16px !important;
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+            margin-bottom: 20px !important;
+            padding: 24px !important;
+        }
+        
         /* Sidebar styling */
         section[data-testid="stSidebar"] {
             background-color: #0B0F19;
@@ -287,14 +299,13 @@ if not yolo_model or not lstm_model:
     st.warning("Silakan pastikan file model `best.pt`/`last.pt` dan `lstm_best.h5` berada dalam folder yang sama dengan skrip ini.")
 else:
     # Video upload card
-    st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
-    st.markdown("### 📤 Upload Video Bahasa Isyarat")
-    uploaded_file = st.file_uploader(
-        "Pilih file video (Format: MP4, AVI, MOV, MKV)",
-        type=["mp4", "avi", "mov", "mkv"],
-        help="Unggah video gerakan bahasa isyarat BISINDO satu kata."
-    )
-    st.markdown("</div>", unsafe_allow_html=True)
+    with st.container(border=True):
+        st.markdown("### 📤 Upload Video Bahasa Isyarat")
+        uploaded_file = st.file_uploader(
+            "Pilih file video (Format: MP4, AVI, MOV, MKV)",
+            type=["mp4", "avi", "mov", "mkv"],
+            help="Unggah video gerakan bahasa isyarat BISINDO satu kata."
+        )
 
     if uploaded_file is not None:
         # Save uploaded file to temp file to read via OpenCV
@@ -470,70 +481,68 @@ else:
                     st.metric("Total Window Dihitung", f"{len(windows30)} window")
                 
                 # Detailed Dashboard
-                st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
-                st.markdown("#### 📊 Distribusi Probabilitas Top-5 Kelas Teratas")
-                
-                # Plot top-5 predictions
-                top5_indices = np.argsort(mean_predictions)[::-1][:5]
-                top5_labels = [label_map.get(idx, f"label{idx}").upper() for idx in top5_indices]
-                top5_probs = mean_predictions[top5_indices] * 100
-                
-                fig, ax = plt.subplots(figsize=(10, 4))
-                fig.patch.set_facecolor('#1E293B')
-                ax.set_facecolor('#1E293B')
-                
-                bars = ax.barh(top5_labels[::-1], top5_probs[::-1], color='#38BDF8', edgecolor='white', height=0.5)
-                ax.set_xlabel('Probability (%)', color='white', fontsize=10)
-                ax.set_title('Top-5 Predicted BISINDO Signs', color='white', fontsize=12, fontweight='bold')
-                ax.tick_params(colors='white', labelsize=9)
-                ax.spines['bottom'].set_color('white')
-                ax.spines['left'].set_color('white')
-                ax.spines['top'].set_visible(False)
-                ax.spines['right'].set_visible(False)
-                
-                # Add text labels on the bars
-                for bar in bars:
-                    width = bar.get_width()
-                    ax.text(width + 1, bar.get_y() + bar.get_height()/2, f'{width:.1f}%', 
-                            va='center', ha='left', color='white', fontsize=9, fontweight='bold')
-                            
-                st.pyplot(fig)
-                st.markdown("</div>", unsafe_allow_html=True)
+                with st.container(border=True):
+                    st.markdown("#### 📊 Distribusi Probabilitas Top-5 Kelas Teratas")
+                    
+                    # Plot top-5 predictions
+                    top5_indices = np.argsort(mean_predictions)[::-1][:5]
+                    top5_labels = [label_map.get(idx, f"label{idx}").upper() for idx in top5_indices]
+                    top5_probs = mean_predictions[top5_indices] * 100
+                    
+                    fig, ax = plt.subplots(figsize=(10, 4))
+                    fig.patch.set_facecolor('#1E293B')
+                    ax.set_facecolor('#1E293B')
+                    
+                    bars = ax.barh(top5_labels[::-1], top5_probs[::-1], color='#38BDF8', edgecolor='white', height=0.5)
+                    ax.set_xlabel('Probability (%)', color='white', fontsize=10)
+                    ax.set_title('Top-5 Predicted BISINDO Signs', color='white', fontsize=12, fontweight='bold')
+                    ax.tick_params(colors='white', labelsize=9)
+                    ax.spines['bottom'].set_color('white')
+                    ax.spines['left'].set_color('white')
+                    ax.spines['top'].set_visible(False)
+                    ax.spines['right'].set_visible(False)
+                    
+                    # Add text labels on the bars
+                    for bar in bars:
+                        width = bar.get_width()
+                        ax.text(width + 1, bar.get_y() + bar.get_height()/2, f'{width:.1f}%', 
+                                va='center', ha='left', color='white', fontsize=9, fontweight='bold')
+                                
+                    st.pyplot(fig)
 
                 # Predictions timeline card
-                st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
-                st.markdown("#### ⏳ Kronologi Deteksi Window-by-Window")
-                
-                # Prepare DataFrame for timeline
-                timeline_data = []
-                for idx, pred in enumerate(predictions):
-                    pred_class_idx = np.argmax(pred)
-                    pred_class_name = label_map.get(pred_class_idx, f"label{pred_class_idx}").upper()
-                    pred_conf = pred[pred_class_idx]
+                with st.container(border=True):
+                    st.markdown("#### ⏳ Kronologi Deteksi Window-by-Window")
                     
-                    # Convert window index to approximate timestamp
-                    # Each window starts at `start = idx * WINDOW_STEP` frames at 10 FPS
-                    timestamp = (idx * WINDOW_STEP) / target_fps
+                    # Prepare DataFrame for timeline
+                    timeline_data = []
+                    for idx, pred in enumerate(predictions):
+                        pred_class_idx = np.argmax(pred)
+                        pred_class_name = label_map.get(pred_class_idx, f"label{pred_class_idx}").upper()
+                        pred_conf = pred[pred_class_idx]
+                        
+                        # Convert window index to approximate timestamp
+                        # Each window starts at `start = idx * WINDOW_STEP` frames at 10 FPS
+                        timestamp = (idx * WINDOW_STEP) / target_fps
+                        
+                        timeline_data.append({
+                            "Window Ke": idx + 1,
+                            "Estimasi Detik": f"{timestamp:.2f} s",
+                            "Prediksi Kata": pred_class_name,
+                            "Confidence Score": f"{pred_conf * 100:.2f}%"
+                        })
                     
-                    timeline_data.append({
-                        "Window Ke": idx + 1,
-                        "Estimasi Detik": f"{timestamp:.2f} s",
-                        "Prediksi Kata": pred_class_name,
-                        "Confidence Score": f"{pred_conf * 100:.2f}%"
-                    })
-                
-                df_timeline = pd.DataFrame(timeline_data)
-                st.dataframe(df_timeline, use_container_width=True)
-                
-                # Export option
-                csv = df_timeline.to_csv(index=False).encode('utf-8')
-                st.download_button(
-                    label="📥 Download Hasil Prediksi (.csv)",
-                    data=csv,
-                    file_name="hasil_prediksi_bisindo.csv",
-                    mime="text/csv"
-                )
-                st.markdown("</div>", unsafe_allow_html=True)
+                    df_timeline = pd.DataFrame(timeline_data)
+                    st.dataframe(df_timeline, use_container_width=True)
+                    
+                    # Export option
+                    csv = df_timeline.to_csv(index=False).encode('utf-8')
+                    st.download_button(
+                        label="📥 Download Hasil Prediksi (.csv)",
+                        data=csv,
+                        file_name="hasil_prediksi_bisindo.csv",
+                        mime="text/csv"
+                    )
                 
             else:
                 st.error("Gagal melakukan ekstraksi sekuens landmark. Cek apakah tangan terdeteksi di video.")
