@@ -9,3 +9,4 @@ matplotlib
 seaborn
 pillow
 scikit-learn
+python-3.11
